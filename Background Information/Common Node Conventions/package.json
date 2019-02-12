@@ -1,0 +1,18 @@
+{
+  "name": "conventions",
+  "version": "1.0.0",
+  "description": "Simple app to integrate local dependencies with NPM",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Kanish Gosain",
+  "license": "MIT",
+  "dependencies": {
+    "math": "./lib",
+    "jokes": "./lib/jokes"
+  }
+}
