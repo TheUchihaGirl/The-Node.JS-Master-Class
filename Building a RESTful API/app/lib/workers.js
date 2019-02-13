@@ -12,6 +12,8 @@ const http = require('http');
 const helpers = require('./helpers');
 const url = require('url');
 const _logs = require('./logs');
+const util = require('util');
+var debug = util.debuglog('workers');
 
 // Instantiate the worker object
 var workers = {};
@@ -28,12 +30,12 @@ workers.gatherAllChecks = function(){
             // Pass it tot he check validator, let that function continue or log the error
             workers.validateCheckData(originalCheckData);
           } else {
-            console.log("Error reading one of the checks data");
+            debug("Error reading one of the checks data");
           }
         });
       });
     } else {
-      console.log("Error: Could not find any checks to process");
+      debug("Error: Could not find any checks to process");
     }
   });
 };
@@ -65,7 +67,7 @@ workers.validateCheckData = function(originalCheckData){
   ) {
     workers.performCheck(originalCheckData);
   } else {
-    console.log('Error: One of the checks is not properly formatted. Skipping it.');
+    debug('Error: One of the checks is not properly formatted. Skipping it.');
   }
 };
 
@@ -165,10 +167,10 @@ workers.processCheckOutcome = function(originalCheckData, checkOutcome) {
       if(alertWarranted) {
         workers.alertToStatusChange(newCheckData);
       } else {
-        console.log('Check Outcome has not changes, no alert needed');
+        debug('Check Outcome has not changed, no alert needed');
       }
     } else {
-      console.log('Error trying to save updates to one of the checks');
+      debug('Error trying to save updates to one of the checks');
     }
   });
 };
@@ -178,9 +180,9 @@ workers.alertToStatusChange = function(newCheckData) {
   var msg = 'Alert : You check for '+newCheckData.method.toUpperCase()+' '+newCheckData.protocol+'://'+newCheckData.url+' is currently '+newCheckData.state;
   helpers.sendTwilioSms(newCheckData.userPhone, msg, function(err){
     if(!err) {
-      console.log("Success: User was alerted to a status change in their check via SMS:", msg);
+      debug("Success: User was alerted to a status change in their check via SMS:", msg);
     } else {
-      console.log('Error: Could not send SMS alert tot he user who had a state change in their check');
+      debug('Error: Could not send SMS alert to the user who had a state change in their check');
     }
   });
 }
@@ -207,9 +209,9 @@ workers.log = function(originalCheckData, checkOutcome, state, alertWarranted, t
   // Append the log string to the file
   _logs.append(logFileName, logString, function(err){
     if(!err) {
-      console.log('Logging to file succeeded!');
+      debug('Logging to file succeeded!');
     } else {
-      console.log('Logging to file failed!');
+      debug('Logging to file failed!');
     }
   });
 };
@@ -236,18 +238,18 @@ workers.rotateLogs = function() {
             // Truncate the log
             _logs.truncate(logId, function(err){
               if (!err) {
-                console.log('Success truncating log file');
+                debug('Success truncating log file');
               } else {
-                console.log('Error truncating log file');
+                debug('Error truncating log file');
               }
             });
           } else {
-            console.log('Error compressing one of the log file:', err);
+            debug('Error compressing one of the log file:', err);
           }
         })
       });
     } else {
-      console.log('Error : Could not find any logs to rotate');
+      debug('Error : Could not find any logs to rotate');
     }
   });
 };
@@ -261,6 +263,9 @@ workers.logRotationLoop = function(){
 
 // Init function
 workers.init = function(){
+
+  // Send to console, in yellow
+  console.log('\x1b[33m%s\x1b[0m', 'Background workers are running');
   // Execute all the checks immediately
   workers.gatherAllChecks();
 

@@ -13,6 +13,8 @@ const fs = require('fs');
 const helpers = require('./helpers');
 const path = require('path');
 const router = require('./router');
+const util = require('util');
+var debug = util.debuglog('server');
 
 // Instantiate the server module object
 var server = {};
@@ -91,8 +93,15 @@ server.unifiedServer = function(req, res) {
         res.writeHead(statusCode);
         res.end(payloadString);
 
-        // og the request path
-        console.log('Returning this response:', statusCode, payloadString);
+        // log the request path
+        // debug('Returning this response:', statusCode, payloadString);
+
+        // If the response is 200, print green otherwise, print red
+        if(statusCode == 200) {
+          debug('\x1b[32m%s\x1b[0m',method.toUpperCase()+' /'+trimmedPath+' '+statusCode);
+        } else {
+          debug('\x1b[31m%s\x1b[0m',method.toUpperCase()+' /'+trimmedPath+' '+statusCode);
+        }
       });
 
       // Log the request path
@@ -106,12 +115,14 @@ server.unifiedServer = function(req, res) {
 server.init = function(){
   // Start the HTTP server
   server.httpServer.listen(config.httpPort,function(){
-    console.log('The HTTP server is listening on port '+config.httpPort+' in '+config.envName+' mode');
+    console.log('\x1b[36m%s\x1b[0m', 'The HTTP server is listening on port '+config.httpPort+' in '+config.envName+' mode');
+
   });
 
   // Start the HTTPs server
   server.httpsServer.listen(config.httpsPort,function(){
-    console.log('The HTTPS server is listening on port '+config.httpsPort+' in '+config.envName+' mode');
+    console.log('\x1b[35m%s\x1b[0m', 'The HTTPS server is listening on port '+config.httpsPort+' in '+config.envName+' mode');
+
   });
 
 };
