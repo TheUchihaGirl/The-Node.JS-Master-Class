@@ -1,2 +1,4 @@
 *.pem
 *.json
+*.log
+*.gz.b64
